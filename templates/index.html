@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Am Groot - Terminal</title>
+    <style>
+        /* Terminal-inspired design with neutral colors */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #404040;
+            --bg-input: #333333;
+            
+            --text-primary: #e5e5e5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            
+            --accent-green: #00ff41;
+            --accent-brown: #ff8500;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+            
+            --border: #555555;
+            --border-focus: #4ade80;
+            
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.4;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* Terminal Header */
+        .terminal-header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: var(--accent-red); }
+        .dot.yellow { background: var(--accent-yellow); }
+        .dot.green { background: var(--accent-green); }
+
+        .prompt {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .github-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        .github-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-green);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px;
+            height: fit-content;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            color: var(--accent-brown);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+        }
+
+        /* Variables */
+        .variables {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .variable {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: var(--bg-input);
+            border-radius: 2px;
+            border-left: 2px solid var(--accent-green);
+        }
+
+        .var-name {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
+        .var-value {
+            color: var(--accent-green);
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 2px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* Examples */
+        .examples {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .example-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .example-btn:active {
+            transform: translateX(2px);
+        }
+
+        /* Reference */
+        .reference {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ref-item {
+            padding: 6px 8px;
+            background: var(--bg-input);
+            border-radius: 2px;
+            border-left: 2px solid var(--accent-brown);
+        }
+
+        .ref-code {
+            color: var(--accent-green);
+            font-size: 11px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .ref-desc {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        /* Main Editor */
+        .editor {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-tab {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-green);
+        }
+
+        .btn-run {
+            color: var(--accent-green);
+        }
+
+        .btn-run:hover {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Code Area */
+        .code-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .editor-textarea {
+            background: var(--bg-primary);
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 16px;
+            resize: none;
+            outline: none;
+            min-height: 300px;
+            flex: 1;
+        }
+
+        .editor-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Output */
+        .output-section {
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .output-header {
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .output-title {
+            color: var(--accent-brown);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .output {
+            padding: 16px;
+            min-height: 120px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            white-space: pre-wrap;
+            color: var(--accent-green);
+            background: var(--bg-primary);
+        }
+
+        .output.error {
+            color: var(--accent-red);
+        }
+
+        .status-line {
+            background: var(--bg-tertiary);
+            padding: 4px 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Help Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: var(--accent-brown);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-red);
+        }
+
+        .modal-body {
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .modal-body h3 {
+            color: var(--accent-green);
+            margin: 16px 0 8px 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-body p {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .modal-body ul {
+            margin: 8px 0 12px 16px;
+            color: var(--text-secondary);
+        }
+
+        .modal-body code {
+            background: var(--bg-input);
+            color: var(--accent-green);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .syntax-examples {
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: 2px;
+            margin: 8px 0;
+        }
+
+        .syntax-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .syntax-row:last-child {
+            border-bottom: none;
+        }
+
+        .syntax-row code {
+            background: var(--bg-primary);
+            min-width: 180px;
+            padding: 4px 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .terminal-header {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Terminal-style header -->
+        <div class="terminal-header">
+            <div class="terminal-title">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <span class="prompt">groot@terminal:~$</span>
+                <span>I Am Groot - Esoteric Language Interpreter</span>
+            </div>
+            <a href="https://github.com/leonardocerv/groot-esolang" target="_blank" class="github-link">
+                <span>///</span>
+                <span>github.com/leonardocerv/groot-esolang</span>
+            </a>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="section">
+                <div class="section-title">Variables</div>
+                <div class="variables">
+                    <div class="variable">
+                        <span class="var-name">GROOT</span>
+                        <span class="var-value" id="grootValue">0</span>
+                    </div>
+                    <div class="variable">
+                        <span class="var-name">groot</span>
+                        <span class="var-value" id="grootLowerValue">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Examples</div>
+                <div class="examples">
+                    <button class="example-btn" data-example="hello">Hello World</button>
+                    <button class="example-btn" data-example="variables">Variables</button>
+                    <button class="example-btn" data-example="arithmetic">Arithmetic</button>
+                    <button class="example-btn" data-example="functions">Functions</button>
+                    <button class="example-btn" data-example="advanced">Advanced</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Quick Reference</div>
+                <div class="reference">
+                    <div class="ref-item">
+                        <code class="ref-code">I am GROOT!</code>
+                        <div class="ref-desc">increment GROOT</div>
+                    </div>
+                    <div class="ref-item">
+                        <code class="ref-code">I am groot?</code>
+                        <div class="ref-desc">decrement groot</div>
+                    </div>
+                    <div class="ref-item">
+                        <code class="ref-code">I am GROOT</code>
+                        <div class="ref-desc">print GROOT</div>
+                    </div>
+                    <div class="ref-item">
+                        <code class="ref-code">groot, I am GROOT</code>
+                        <div class="ref-desc">assignment</div>
+                    </div>
+                </div>
+                <button class="example-btn" onclick="showHelp()" style="margin-top: 12px; width: 100%; text-align: center;">
+                    Show Full Documentation
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor">
+            <div class="editor-header">
+                <div class="file-tab">main.groot</div>
+                <div class="controls">
+                    <button class="btn btn-run" id="runBtn">
+                        <span>▶</span>
+                        <span>RUN</span>
+                    </button>
+                    <button class="btn" id="resetBtn">RESET</button>
+                    <button class="btn" onclick="showHelp()">HELP</button>
+                </div>
+            </div>
+
+            <div class="code-area">
+                <textarea class="editor-textarea" id="codeEditor" placeholder="# Write your Groot code here - try clicking the examples on the left!
+# Your first Groot program:
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 1
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 2  
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 3
+I am groot!                     # groot = groot + 1 → groot = 1
+I am groot!                     # groot = groot + 1 → groot = 2
+
+# Print the values (no punctuation for printing)
+I am GROOT                      # Print GROOT → outputs: 3
+I am groot                      # Print groot → outputs: 2"></textarea>
+            </div>
+
+            <div class="output-section">
+                <div class="output-header">
+                    <div class="output-title">Output</div>
+                    <button class="clear-btn" id="clearBtn">clear</button>
+                </div>
+                <div class="output" id="output">Ready to execute Groot code...</div>
+                <div class="status-line">
+                    <span id="status">Ready</span> | Ctrl+Enter to run | ESC for help
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">I Am Groot Documentation</div>
+                <button class="close-btn" onclick="hideHelp()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>I Am Groot</strong> is an esoteric programming language inspired by Groot from Guardians of the Galaxy. The entire syntax consists of variations of "I am Groot!"</p>
+                
+                <h3>Variables</h3>
+                <p>Two variables are available: <code>GROOT</code> (uppercase) and <code>groot</code> (lowercase)</p>
+
+                <h3>Basic Operations</h3>
+                <div class="syntax-examples">
+                    <div class="syntax-row">
+                        <code>I am GROOT!</code>
+                        <span>Increment GROOT by 1</span>
+                    </div>
+                    <div class="syntax-row">
+                        <code>I am groot!</code>
+                        <span>Increment groot by 1</span>
+                    </div>
+                    <div class="syntax-row">
+                        <code>I am GROOT?</code>
+                        <span>Decrement GROOT by 1</span>
+                    </div>
+                    <div class="syntax-row">
+                        <code>I am groot?</code>
+                        <span>Decrement groot by 1</span>
+                    </div>
+                    <div class="syntax-row">
+                        <code>I am GROOT</code>
+                        <span>Print GROOT value</span>
+                    </div>
+                    <div class="syntax-row">
+                        <code>I am groot</code>
+                        <span>Print groot value</span>
+                    </div>
+                </div>
+
+                <h3>Advanced Features</h3>
+                <ul>
+                    <li>Variable assignment: <code>groot, I am GROOT</code></li>
+                    <li>Arithmetic: <code>groot! I am GROOT</code></li>
+                    <li>Functions: <code>I am... Groot,</code> ... <code>I am GROOT.</code></li>
+                    <li>Conditionals and loops with various punctuation patterns</li>
+                    <li>Error handling with <code>I am Groot???</code> and <code>I am Groot!!!</code></li>
+                </ul>
+
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li><code>Ctrl+Enter</code> - Run code</li>
+                    <li><code>Escape</code> - Close help</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class GrootTerminal {
+            constructor() {
+                this.initializeElements();
+                this.attachEventListeners();
+                this.loadExamples();
+                this.updateStatus('Initialized');
+            }
+
+            initializeElements() {
+                this.codeEditor = document.getElementById('codeEditor');
+                this.runBtn = document.getElementById('runBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.output = document.getElementById('output');
+                this.status = document.getElementById('status');
+                this.grootValue = document.getElementById('grootValue');
+                this.grootLowerValue = document.getElementById('grootLowerValue');
+                this.helpModal = document.getElementById('helpModal');
+            }
+
+            attachEventListeners() {
+                this.runBtn.addEventListener('click', () => this.runCode());
+                this.resetBtn.addEventListener('click', () => this.resetInterpreter());
+                this.clearBtn.addEventListener('click', () => this.clearOutput());
+                
+                // Example buttons
+                document.querySelectorAll('.example-btn[data-example]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const example = e.target.getAttribute('data-example');
+                        this.loadExample(example);
+                    });
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.runCode();
+                    }
+                    if (e.key === 'Escape') {
+                        this.hideHelp();
+                    }
+                });
+
+                // Modal close on backdrop click
+                this.helpModal.addEventListener('click', (e) => {
+                    if (e.target === this.helpModal) {
+                        this.hideHelp();
+                    }
+                });
+            }
+
+            updateStatus(message) {
+                this.status.textContent = message;
+            }
+
+            clearOutput() {
+                this.output.textContent = 'Ready to execute Groot code...';
+                this.output.className = 'output';
+                this.updateStatus('Output cleared');
+            }
+
+            showOutput(text, isError = false) {
+                this.output.textContent = text || 'Code executed successfully';
+                this.output.className = isError ? 'output error' : 'output';
+                this.updateStatus(isError ? 'Error' : 'Success');
+            }
+
+            updateVariables(variables) {
+                if (variables) {
+                    this.grootValue.textContent = variables.GROOT || 0;
+                    this.grootLowerValue.textContent = variables.groot || 0;
+                }
+            }
+
+            loadExamples() {
+                // Built-in examples with detailed comments and hints
+                this.examples = {
+                    'hello': `# Your first Groot program!
+# Let's increment GROOT three times and print it
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 1
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 2  
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 3
+I am GROOT                      # Print GROOT → outputs: 3`,
+
+                    'variables': `# Working with both variables: GROOT (uppercase) and groot (lowercase)
+# Initialize both variables
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 1
+I am groot!                     # groot = groot + 1 → groot = 1
+
+# Print their values (no punctuation for printing)
+I am GROOT                      # Print GROOT → outputs: 1
+I am groot                      # Print groot → outputs: 1`,
+
+                    'arithmetic': `# Basic arithmetic operations between variables
+# Set up initial values
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 1
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 2
+
+# Perform addition: groot = groot + GROOT
+I am groot! I am GROOT          # groot = groot + GROOT → groot = 0 + 2 = 2
+I am groot                      # Print groot → outputs: 2`,
+
+                    'functions': `# Function definition and calling
+# Functions start with "I am... Groot," and end with "I am GROOT."
+I am... Groot,
+    I am GROOT!                 # GROOT = GROOT + 1 (function body)
+    I am GROOT.                 # Return statement - functions must end with this
+
+# Call the function and store result in groot
+I am groot, I am... Groot       # groot = function_result
+I am groot                      # Print groot → shows the function result`,
+
+                    'advanced': `# Advanced example with error handling
+# Initialize variable
+I am GROOT!                     # GROOT = GROOT + 1 → GROOT = 1
+
+# Function with return value
+I am... Groot,
+    I am GROOT!                 # GROOT = GROOT + 1 → GROOT = 2
+    I am GROOT.                 # Return GROOT
+
+# Try-catch block: "I am Groot???" = try, "I am Groot!!!" = catch
+I am Groot???                   # Start try block
+    I am groot, I am... Groot   # groot = function() → groot = 2
+I am Groot!!!                   # Start catch block (executes if error)
+    I am groot.                 # Print error message`
+                };
+            }
+
+            loadExample(type) {
+                const code = this.examples[type];
+                
+                if (code) {
+                    this.codeEditor.value = code;
+                    this.codeEditor.focus();
+                    this.updateStatus(`Loaded ${type} example`);
+                }
+            }
+
+            // Since this is standalone, we'll simulate the interpreter
+            simulateGrootExecution(code) {
+                let GROOT = 0;
+                let groot = 0;
+                let output = [];
+                
+                const lines = code.split('\n');
+                
+                try {
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (!line || line.startsWith('//') || line.startsWith('#')) continue;
+                        
+                        if (line === 'I am GROOT!') {
+                            GROOT++;
+                        } else if (line === 'I am groot!') {
+                            groot++;
+                        } else if (line === 'I am GROOT?') {
+                            GROOT--;
+                        } else if (line === 'I am groot?') {
+                            groot--;
+                        } else if (line === 'I am GROOT') {
+                            output.push(GROOT.toString());
+                        } else if (line === 'I am groot') {
+                            output.push(groot.toString());
+                        }
+                    }
+                    
+                    return {
+                        success: true,
+                        output: output.join('\n') || 'Code executed successfully',
+                        variables: { GROOT, groot }
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message,
+                        variables: { GROOT, groot }
+                    };
+                }
+            }
+
+            async runCode() {
+                const code = this.codeEditor.value.trim();
+                
+                if (!code) {
+                    this.showOutput('No code to execute', true);
+                    return;
+                }
+
+                this.runBtn.disabled = true;
+                this.runBtn.innerHTML = '<span>⏸</span><span>RUNNING</span>';
+                this.updateStatus('Executing...');
+
+                // Simulate execution
+                const result = this.simulateGrootExecution(code);
+
+                if (result.success) {
+                    this.showOutput(result.output);
+                    this.updateVariables(result.variables);
+                } else {
+                    this.showOutput(result.error, true);
+                    if (result.variables) {
+                        this.updateVariables(result.variables);
+                    }
+                }
+
+                this.runBtn.disabled = false;
+                this.runBtn.innerHTML = '<span>▶</span><span>RUN</span>';
+            }
+
+            async resetInterpreter() {
+                this.resetBtn.disabled = true;
+                this.updateStatus('Resetting...');
+
+                this.updateVariables({ GROOT: 0, groot: 0 });
+                this.showOutput('Interpreter reset successfully');
+
+                this.resetBtn.disabled = false;
+            }
+
+            showHelp() {
+                this.helpModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                this.updateStatus('Help displayed');
+            }
+
+            hideHelp() {
+                this.helpModal.classList.remove('show');
+                document.body.style.overflow = '';
+                this.updateStatus('Ready');
+            }
+        }
+
+        // Global functions for modal
+        function showHelp() {
+            window.grootTerminal.showHelp();
+        }
+
+        function hideHelp() {
+            window.grootTerminal.hideHelp();
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.grootTerminal = new GrootTerminal();
+        });
+    </script>
+</body>
+</html>
