@@ -863,29 +863,34 @@ I am Groot!!!                   # Start catch block (executes if error)
 
             async runCode() {
                 const code = this.codeEditor.value.trim();
-                
                 if (!code) {
                     this.showOutput('No code to execute', true);
                     return;
                 }
-
                 this.runBtn.disabled = true;
                 this.runBtn.innerHTML = '<span>⏸</span><span>RUNNING</span>';
                 this.updateStatus('Executing...');
 
-                // Simulate execution
-                const result = this.simulateGrootExecution(code);
-
-                if (result.success) {
-                    this.showOutput(result.output);
-                    this.updateVariables(result.variables);
-                } else {
-                    this.showOutput(result.error, true);
-                    if (result.variables) {
+                try {
+                    const response = await fetch('/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code }),
+                        credentials: 'same-origin'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showOutput(result.output);
                         this.updateVariables(result.variables);
+                    } else {
+                        this.showOutput(result.error || 'Execution error', true);
+                        if (result.variables) {
+                            this.updateVariables(result.variables);
+                        }
                     }
+                } catch (err) {
+                    this.showOutput('Network or server error', true);
                 }
-
                 this.runBtn.disabled = false;
                 this.runBtn.innerHTML = '<span>▶</span><span>RUN</span>';
             }
@@ -893,10 +898,22 @@ I am Groot!!!                   # Start catch block (executes if error)
             async resetInterpreter() {
                 this.resetBtn.disabled = true;
                 this.updateStatus('Resetting...');
-
-                this.updateVariables({ GROOT: 0, groot: 0 });
-                this.showOutput('Interpreter reset successfully');
-
+                try {
+                    const response = await fetch('/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        this.updateVariables(result.variables);
+                        this.showOutput('Interpreter reset successfully');
+                    } else {
+                        this.showOutput(result.error || 'Reset error', true);
+                    }
+                } catch (err) {
+                    this.showOutput('Network or server error', true);
+                }
                 this.resetBtn.disabled = false;
             }
 

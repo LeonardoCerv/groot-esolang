@@ -28,14 +28,14 @@ class GrootParser:
         lines = code.split('\n')
         for line in lines:
             self.line_number += 1
-            # Remove inline comments
-            if '#' in line:
-                line = line.split('#', 1)[0]
-            # Skip empty or comment-only lines
+            # Skip empty or comment-only lines (full-line comments)
             if not line.strip():
                 continue
             if line.strip().startswith('#'):
                 continue
+            # Remove inline comments (only after checking for full-line comment)
+            if '#' in line:
+                line = line.split('#', 1)[0]
             # Calculate indentation (for block structure)
             indent = len(line) - len(line.lstrip())
             line_content = line.strip()
