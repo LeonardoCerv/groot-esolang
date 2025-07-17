@@ -113,8 +113,6 @@ def execute_code(code: str, parser: GrootParser, interpreter: GrootInterpreter, 
         if show_groot_on_success:
             print("\033[92mProgram completed successfully!\033[0m")
             print()
-            print(get_colored_groot())
-            print()
             
     except Exception as e:
         print(f"\033[91msyntax error: {e}\033[0m")
